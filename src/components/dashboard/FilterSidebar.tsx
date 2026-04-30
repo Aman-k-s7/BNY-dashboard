@@ -5,6 +5,7 @@ import { CalendarIcon, ChevronDown, Filter, RotateCcw, Search } from "lucide-rea
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Checkbox } from "@/components/ui/checkbox";
+import { FIXED_DEVICE_SERIAL } from "@/config/dashboard";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import type { DashboardFilters, FilterOptions } from "@/lib/dashboard";
@@ -114,8 +115,6 @@ function MultiSelectDropdown({
   );
 }
 
-
-const FIXED_DEVICE_SERIAL = "AGFW26009";
 
 interface FilterSidebarProps {
   options?: FilterOptions;

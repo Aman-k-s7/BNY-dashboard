@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import AlertsAnomalies from "@/components/dashboard/AlertsAnomalies";
 import ChatBar from "@/components/dashboard/ChatBar";
 import CoreAnalysis from "@/components/dashboard/CoreAnalysis";
+import { DEFAULT_DASHBOARD_DEVICES } from "@/config/dashboard";
 import CostImpact from "@/components/dashboard/CostImpact";
 import FilterSidebar from "@/components/dashboard/FilterSidebar";
 import FinalInsights from "@/components/dashboard/FinalInsights";
@@ -16,7 +17,7 @@ import type { DashboardFilters } from "@/lib/dashboard";
 
 export default function Index() {
   const { data: filterOptions } = useDashboardFilterOptions();
-  const dashboardDevices = ["AGFW26009"];
+  const dashboardDevices = DEFAULT_DASHBOARD_DEVICES;
   const [appliedFilters, setAppliedFilters] = useState<DashboardFilters>({
     devices: dashboardDevices,
     mealTypes: [],

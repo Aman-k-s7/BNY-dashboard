@@ -1,6 +1,9 @@
 FROM node:20-bookworm-slim AS frontend-builder
 WORKDIR /app
 
+ARG VITE_FIXED_DEVICE_SERIAL=AGFW26009
+ENV VITE_FIXED_DEVICE_SERIAL=$VITE_FIXED_DEVICE_SERIAL
+
 COPY package.json package-lock.json ./
 RUN npm ci
 
