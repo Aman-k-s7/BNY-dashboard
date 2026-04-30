@@ -36,8 +36,8 @@ Required app environment variables:
 
 - `DJANGO_SECRET_KEY`
 - `DJANGO_DEBUG=false`
-- `DJANGO_ALLOWED_HOSTS=your-domain.com`
-- `DJANGO_CSRF_TRUSTED_ORIGINS=https://your-domain.com`
+- `DJANGO_ALLOWED_HOSTS=your-domain.com` after you know the final hostname; leave it empty temporarily if needed
+- `DJANGO_CSRF_TRUSTED_ORIGINS=https://your-domain.com` after you know the final hostname; leave it empty temporarily if needed
 - `DJANGO_TIME_ZONE=Asia/Kolkata`
 - `MYSQL_NAME`, `MYSQL_USER`, `MYSQL_PASSWORD`, `MYSQL_HOST`, `MYSQL_PORT`
 - `WASTE_SCAN_TABLE=scm_scans` unless your reporting table has another name

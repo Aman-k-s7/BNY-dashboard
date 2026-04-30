@@ -24,14 +24,34 @@ def _load_local_env() -> None:
 
 _load_local_env()
 
+
+def _split_csv_env(name: str) -> list[str]:
+    return [item.strip() for item in os.getenv(name, "").split(",") if item.strip()]
+
+
+def _is_placeholder_host(value: str) -> bool:
+    normalized = value.strip().lower()
+    return normalized in {"your-domain.com", "example.com", "localhost"}
+
+
+def _allowed_hosts() -> list[str]:
+    hosts = [host for host in _split_csv_env("DJANGO_ALLOWED_HOSTS") if not _is_placeholder_host(host)]
+    return hosts or ["*"]
+
+
+def _csrf_trusted_origins() -> list[str]:
+    origins = []
+    for origin in _split_csv_env("DJANGO_CSRF_TRUSTED_ORIGINS"):
+        host_part = origin.split("://", maxsplit=1)[-1]
+        if _is_placeholder_host(host_part):
+            continue
+        origins.append(origin)
+    return origins
+
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "django-insecure-local-dev-key")
 DEBUG = os.getenv("DJANGO_DEBUG", "true").lower() == "true"
-ALLOWED_HOSTS = [host.strip() for host in os.getenv("DJANGO_ALLOWED_HOSTS", "*").split(",") if host.strip()]
-CSRF_TRUSTED_ORIGINS = [
-    origin.strip()
-    for origin in os.getenv("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",")
-    if origin.strip()
-]
+ALLOWED_HOSTS = _allowed_hosts()
+CSRF_TRUSTED_ORIGINS = _csrf_trusted_origins()
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -114,4 +134,5 @@ STORAGES = {
 }
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+USE_X_FORWARDED_HOST = True
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
