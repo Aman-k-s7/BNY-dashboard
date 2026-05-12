@@ -42,12 +42,12 @@ Required app environment variables:
 - `MYSQL_NAME`, `MYSQL_USER`, `MYSQL_PASSWORD`, `MYSQL_HOST`, `MYSQL_PORT`
 - `WASTE_SCAN_TABLE=scm_scans` unless your reporting table has another name
 - `WASTE_COMPANY_ID=312` unless your tenant/company id differs
-- `WASTE_FIXED_DEVICE_SERIAL=AGFW26009` to lock backend queries to one device
+- `WASTE_FIXED_DEVICE_SERIAL=AGFW26005` to lock backend queries to one device
 - `GEMINI_API_KEY` if Gemini answers are needed
 
 Required Docker build argument for the frontend:
 
-- `VITE_FIXED_DEVICE_SERIAL=AGFW26009`
+- `VITE_FIXED_DEVICE_SERIAL=AGFW26005`
 
 For a client-specific dashboard, set both `WASTE_FIXED_DEVICE_SERIAL` and `VITE_FIXED_DEVICE_SERIAL` to the same serial in Coolify.
 
