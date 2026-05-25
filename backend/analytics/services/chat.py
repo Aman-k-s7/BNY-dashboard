@@ -172,7 +172,7 @@ def _local_answer(question: str, context: dict[str, Any]) -> str:
     if "anomaly" in lowered:
         return f"There are {summary['abnormal_days']} anomaly days in the current filtered range."
     if "cost" in lowered or "rupee" in lowered or "rupees" in lowered or "inr" in lowered:
-        return f"Total cost is Rs {summary['co2_impact']:.2f} for the current filters."
+        return f"Total CO\u2082e is {summary['co2_impact']:.2f} kg for the current filters."
     if "insight" in lowered and insights["key_insights"]:
         return insights["key_insights"][0]
 
