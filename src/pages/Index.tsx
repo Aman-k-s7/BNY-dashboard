@@ -2,16 +2,19 @@ import { useEffect, useMemo, useState } from "react";
 import { FileDown } from "lucide-react";
 
 import AlertsAnomalies from "@/components/dashboard/AlertsAnomalies";
+import BainMarieAnalytics from "@/components/dashboard/BainMarieAnalytics";
 import ChatBar from "@/components/dashboard/ChatBar";
 import CoreAnalysis from "@/components/dashboard/CoreAnalysis";
 import { DEFAULT_DASHBOARD_DEVICES } from "@/config/dashboard";
 import CostImpact from "@/components/dashboard/CostImpact";
+import DailyAvgByCategory from "@/components/dashboard/DailyAvgByCategory";
 import FilterSidebar from "@/components/dashboard/FilterSidebar";
 import FinalInsights from "@/components/dashboard/FinalInsights";
 import KpiStrip from "@/components/dashboard/KpiStrip";
 import PatternDetection from "@/components/dashboard/PatternDetection";
 import TimeAnalysis from "@/components/dashboard/TimeAnalysis";
 import TrendAnalysis from "@/components/dashboard/TrendAnalysis";
+import UsageAnalytics from "@/components/dashboard/UsageAnalytics";
 import { useDashboardData, useDashboardFilterOptions } from "@/hooks/use-dashboard-data";
 import type { DashboardFilters } from "@/lib/dashboard";
 
@@ -95,6 +98,12 @@ export default function Index() {
           <TimeAnalysis filters={filters} options={filterOptions} />
 
           <AlertsAnomalies foodItems={dashboard.foodItems} wasteCategories={dashboard.wasteCategories} anomalies={dashboard.anomalies} />
+
+          <UsageAnalytics filters={filters} />
+
+          <BainMarieAnalytics filters={filters} />
+
+          <DailyAvgByCategory filters={filters} />
 
           <PatternDetection insights={dashboard.insights} />
 

@@ -121,7 +121,7 @@ def get_dashboard_summary(filters: FilterParams) -> dict:
     summary_sql = f"""
         SELECT
             ROUND(COALESCE(SUM({_weight_expr()}), 0), 3) AS total_waste,
-            ROUND(COALESCE(SUM({_weight_expr()}), 0) * 39.5, 3) AS co2_impact
+            ROUND(COALESCE(SUM({_weight_expr()}), 0) * 1.75, 3) AS co2_impact
         FROM {_table()}
         {waste_where_sql}
     """
@@ -647,4 +647,149 @@ def get_chat_context(filters: FilterParams) -> dict:
         "weekly_waste": get_weekly_waste(filters),
         "weekday_waste": get_waste_by_weekday(filters),
         "insights": get_dashboard_insights(filters),
+    }
+
+
+def get_bain_marie_analytics(filters: FilterParams) -> dict:
+    where_sql, params = _where_clause(filters)
+    bm_where_sql = f"{where_sql} AND {_waste_type_expr()} = 'Bain Marie Waste'"
+
+    total_sql = f"""
+        SELECT ROUND(COALESCE(SUM({_weight_expr()}), 0), 3) AS total_weight,
+               COUNT(DISTINCT created_on_date) AS active_days
+        FROM {_table()}
+        {bm_where_sql}
+    """
+    total_row = _fetch_one(total_sql, params)
+    total_weight = float(total_row.get("total_weight") or 0)
+    active_days = int(total_row.get("active_days") or 0)
+
+    top_items_sql = f"""
+        SELECT commodity_name AS name,
+               ROUND(COALESCE(SUM({_weight_expr()}), 0), 3) AS value
+        FROM {_table()}
+        {bm_where_sql}
+        GROUP BY commodity_name
+        ORDER BY value DESC
+        LIMIT 8
+    """
+    top_items = _fetch_all(top_items_sql, params)
+
+    by_meal_sql = f"""
+        SELECT {_meal_expr()} AS name,
+               ROUND(COALESCE(SUM({_weight_expr()}), 0), 3) AS value
+        FROM {_table()}
+        {bm_where_sql}
+          AND {_meal_expr()} IS NOT NULL
+        GROUP BY {_meal_expr()}
+        ORDER BY value DESC
+    """
+    by_meal = _fetch_all(by_meal_sql, params)
+
+    daily_trend_sql = f"""
+        SELECT created_on_date AS date,
+               ROUND(COALESCE(SUM({_weight_expr()}), 0), 3) AS value
+        FROM {_table()}
+        {bm_where_sql}
+        GROUP BY created_on_date
+        ORDER BY created_on_date ASC
+    """
+    daily_trend = [
+        {"date": row["date"].isoformat(), "value": float(row["value"] or 0)}
+        for row in _fetch_all(daily_trend_sql, params)
+    ]
+
+    return {
+        "total_weight": total_weight,
+        "average_daily": round(total_weight / active_days, 3) if active_days else 0,
+        "active_days": active_days,
+        "top_items": [{"name": r["name"], "value": float(r["value"] or 0)} for r in top_items],
+        "by_meal": [{"name": r["name"], "value": float(r["value"] or 0)} for r in by_meal],
+        "daily_trend": daily_trend,
+    }
+
+
+def get_daily_avg_by_category(filters: FilterParams) -> list[dict]:
+    where_sql, params = _where_clause(filters)
+    sql = f"""
+        SELECT
+            commodity_name AS name,
+            ROUND(COALESCE(SUM({_weight_expr()}), 0) / NULLIF(COUNT(DISTINCT created_on_date), 0), 3) AS avg_daily,
+            ROUND(COALESCE(SUM({_weight_expr()}), 0), 3) AS total
+        FROM {_table()}
+        {where_sql}
+        GROUP BY commodity_name
+        ORDER BY avg_daily DESC
+        LIMIT 12
+    """
+    return [
+        {"name": row["name"], "avg_daily": float(row["avg_daily"] or 0), "total": float(row["total"] or 0)}
+        for row in _fetch_all(sql, params)
+    ]
+
+
+def get_usage_analytics(filters: FilterParams) -> dict:
+    count_where_sql, count_params = _where_clause(
+        filters,
+        require_commodity=False,
+        require_created_on_date=False,
+    )
+    date_where_sql, date_params = _where_clause(
+        filters,
+        require_commodity=False,
+        require_created_on_date=True,
+    )
+
+    totals_sql = f"""
+        SELECT
+            COUNT(*) AS total_scans,
+            COUNT(DISTINCT created_on_date) AS active_days,
+            COUNT(DISTINCT device_serial_no) AS total_devices
+        FROM {_table()}
+        {count_where_sql}
+    """
+    totals = _fetch_one(totals_sql, count_params)
+    total_scans = int(totals.get("total_scans") or 0)
+    active_days = int(totals.get("active_days") or 0)
+
+    by_meal_sql = f"""
+        SELECT {_meal_expr()} AS name, COUNT(*) AS scans
+        FROM {_table()}
+        {date_where_sql}
+          AND {_meal_expr()} IS NOT NULL
+        GROUP BY {_meal_expr()}
+        ORDER BY scans DESC
+    """
+    by_meal = [{"name": r["name"], "scans": int(r["scans"] or 0)} for r in _fetch_all(by_meal_sql, date_params)]
+
+    by_waste_type_sql = f"""
+        SELECT {_waste_type_expr()} AS name, COUNT(*) AS scans
+        FROM {_table()}
+        {date_where_sql}
+          AND {_waste_type_expr()} IS NOT NULL
+        GROUP BY {_waste_type_expr()}
+        ORDER BY scans DESC
+    """
+    by_waste_type = [{"name": r["name"], "scans": int(r["scans"] or 0)} for r in _fetch_all(by_waste_type_sql, date_params)]
+
+    daily_sql = f"""
+        SELECT created_on_date AS date, COUNT(*) AS scans
+        FROM {_table()}
+        {date_where_sql}
+        GROUP BY created_on_date
+        ORDER BY created_on_date ASC
+    """
+    daily_scans = [
+        {"date": row["date"].isoformat(), "scans": int(row["scans"] or 0)}
+        for row in _fetch_all(daily_sql, date_params)
+    ]
+
+    return {
+        "total_scans": total_scans,
+        "active_days": active_days,
+        "scans_per_day": round(total_scans / active_days, 1) if active_days else 0,
+        "total_devices": int(totals.get("total_devices") or 0),
+        "by_meal": by_meal,
+        "by_waste_type": by_waste_type,
+        "daily_scans": daily_scans,
     }

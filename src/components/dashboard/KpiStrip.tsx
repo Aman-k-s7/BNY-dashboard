@@ -19,18 +19,23 @@ export default function KpiStrip({ summary }: KpiStripProps) {
   ];
 
   return (
-    <div className="grid grid-cols-6 gap-3">
-      {kpis.map((kpi) => (
-        <div key={kpi.label} className="kpi-card flex items-center gap-3">
-          <div className={`${kpi.color} shrink-0`}>
-            <kpi.icon className="h-5 w-5" />
+    <div className="space-y-1.5">
+      <div className="grid grid-cols-6 gap-3">
+        {kpis.map((kpi) => (
+          <div key={kpi.label} className="kpi-card flex items-center gap-3">
+            <div className={`${kpi.color} shrink-0`}>
+              <kpi.icon className="h-5 w-5" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs text-muted-foreground truncate">{kpi.label}</p>
+              <p className="text-lg font-bold leading-tight text-foreground">{kpi.value}</p>
+            </div>
           </div>
-          <div className="min-w-0">
-            <p className="text-xs text-muted-foreground truncate">{kpi.label}</p>
-            <p className="text-lg font-bold leading-tight text-foreground">{kpi.value}</p>
-          </div>
-        </div>
-      ))}
+        ))}
+      </div>
+      <p className="text-[10px] text-muted-foreground/70 leading-relaxed">
+        *CO₂e figures based on avg emission factors (1.75 kg CO₂e/kg food waste). Emission factors are applied based on procurement weight basis. Cooked weight is used as a conservative proxy. Cooking energy not included; values are indicative.
+      </p>
     </div>
   );
 }

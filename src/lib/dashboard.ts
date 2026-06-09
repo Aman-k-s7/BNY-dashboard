@@ -76,6 +76,31 @@ export interface WeekdayComparisonGrid {
   }>;
 }
 
+export interface BainMarieAnalytics {
+  total_weight: number;
+  average_daily: number;
+  active_days: number;
+  top_items: NamedValue[];
+  by_meal: NamedValue[];
+  daily_trend: Array<{ date: string; value: number }>;
+}
+
+export interface DailyAvgCategory {
+  name: string;
+  avg_daily: number;
+  total: number;
+}
+
+export interface UsageAnalytics {
+  total_scans: number;
+  active_days: number;
+  scans_per_day: number;
+  total_devices: number;
+  by_meal: Array<{ name: string; scans: number }>;
+  by_waste_type: Array<{ name: string; scans: number }>;
+  daily_scans: Array<{ date: string; scans: number }>;
+}
+
 
 function buildParams(filters: DashboardFilters): URLSearchParams {
   const params = new URLSearchParams();
@@ -114,6 +139,9 @@ export const dashboardApi = {
   getTopDevices: (filters: DashboardFilters) => fetchJson<NamedValue[]>("top-devices", filters),
   getInsights: (filters: DashboardFilters) => fetchJson<DashboardInsights>("dashboard-insights", filters),
   getFilterOptions: () => fetchJson<FilterOptions>("filter-options"),
+  getBainMarieAnalytics: (filters: DashboardFilters) => fetchJson<BainMarieAnalytics>("bain-marie-analytics", filters),
+  getDailyAvgByCategory: (filters: DashboardFilters) => fetchJson<DailyAvgCategory[]>("daily-avg-by-category", filters),
+  getUsageAnalytics: (filters: DashboardFilters) => fetchJson<UsageAnalytics>("usage-analytics", filters),
   getMealBreakdown: async (filters: DashboardFilters, wasteTypes: string[]) => {
     const params = buildParams(filters);
     if (wasteTypes.length) params.set("waste_types", wasteTypes.join(","));

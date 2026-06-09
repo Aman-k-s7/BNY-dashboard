@@ -22,6 +22,9 @@ from analytics.services.dashboard import (
     get_weekday_comparison_grid,
     get_waste_by_category,
     get_weekly_waste,
+    get_bain_marie_analytics,
+    get_daily_avg_by_category,
+    get_usage_analytics,
 )
 from analytics.services.filters import FilterParams, parse_filters
 
@@ -248,3 +251,36 @@ def moisture_data(request: HttpRequest) -> JsonResponse:
     except DatabaseError as exc:
         return _database_error_response(exc)
     return JsonResponse(payload, safe=False)
+
+
+@require_GET
+def bain_marie_analytics(request: HttpRequest) -> JsonResponse:
+    try:
+        payload = get_bain_marie_analytics(_parse_request_filters(request))
+    except ValidationError as exc:
+        return _invalid_filters_response(exc)
+    except DatabaseError as exc:
+        return _database_error_response(exc)
+    return JsonResponse(payload)
+
+
+@require_GET
+def daily_avg_by_category(request: HttpRequest) -> JsonResponse:
+    try:
+        payload = get_daily_avg_by_category(_parse_request_filters(request))
+    except ValidationError as exc:
+        return _invalid_filters_response(exc)
+    except DatabaseError as exc:
+        return _database_error_response(exc)
+    return JsonResponse(payload, safe=False)
+
+
+@require_GET
+def usage_analytics(request: HttpRequest) -> JsonResponse:
+    try:
+        payload = get_usage_analytics(_parse_request_filters(request))
+    except ValidationError as exc:
+        return _invalid_filters_response(exc)
+    except DatabaseError as exc:
+        return _database_error_response(exc)
+    return JsonResponse(payload)
