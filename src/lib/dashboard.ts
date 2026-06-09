@@ -4,6 +4,7 @@ export interface DashboardFilters {
   devices: string[];
   mealTypes: string[];
   categories: string[];
+  wasteTypes: string[];
   weeks: string[];
 }
 
@@ -54,6 +55,7 @@ export interface FilterOptions {
   devices: string[];
   meal_types: string[];
   categories: string[];
+  waste_types: string[];
   weeks: FilterWeek[];
   min_date: string | null;
   max_date: string | null;
@@ -83,6 +85,7 @@ function buildParams(filters: DashboardFilters): URLSearchParams {
   if (filters.devices.length) params.set("devices", filters.devices.join(","));
   if (filters.mealTypes.length) params.set("meal_types", filters.mealTypes.join(","));
   if (filters.categories.length) params.set("categories", filters.categories.join(","));
+  if (filters.wasteTypes?.length) params.set("waste_types", filters.wasteTypes.join(","));
   return params;
 }
 
@@ -140,6 +143,7 @@ export const dashboardApi = {
       devices: filters.devices.join(","),
       meal_types: filters.mealTypes.join(","),
       categories: filters.categories.join(","),
+      waste_types: filters.wasteTypes?.join(",") ?? "",
     };
     const response = await fetch("/api/chat-query", {
       method: "POST",

@@ -34,16 +34,7 @@ def _meal_expr() -> str:
 
 
 def _waste_type_expr() -> str:
-    raw_waste_type = _json_value_expr("$.scan_data.food_waste_type")
-    return (
-        "CASE "
-        f"WHEN {raw_waste_type} = 'Plate Waste' THEN 'Plate Waste' "
-        f"WHEN {raw_waste_type} IN ('Production Waste', 'Bain Marie Waste') THEN 'Production Waste' "
-        f"WHEN {raw_waste_type} = 'Peel Waste' THEN 'Preparation Waste' "
-        f"WHEN {raw_waste_type} = 'Spoiled Waste' THEN 'Spoilage' "
-        f"WHEN {raw_waste_type} IN ('Donation', 'Repurpose') THEN 'Other' "
-        f"ELSE {raw_waste_type} END"
-    )
+    return _json_value_expr("$.scan_data.food_waste_type")
 
 
 def _amount_expr() -> str:
@@ -499,6 +490,15 @@ def get_filter_options() -> dict:
           AND commodity_name <> ''
         ORDER BY value ASC
     """
+    waste_types_sql = f"""
+        SELECT DISTINCT {_json_value_expr("$.scan_data.food_waste_type")} AS value
+        FROM {_table()}
+        {base_where}
+          AND JSON_VALID(request) = 1
+          AND {_json_value_expr("$.scan_data.food_waste_type")} IS NOT NULL
+          AND {_json_value_expr("$.scan_data.food_waste_type")} <> ''
+        ORDER BY value ASC
+    """
     range_sql = f"""
         SELECT MIN(created_on_date) AS min_date, MAX(created_on_date) AS max_date
         FROM {_table()}
@@ -508,6 +508,7 @@ def get_filter_options() -> dict:
     devices = [row["value"] for row in _fetch_all(devices_sql, base_params)]
     meals = [row["value"] for row in _fetch_all(meals_sql, base_params)]
     categories = [row["value"] for row in _fetch_all(categories_sql, base_params)]
+    waste_types = [row["value"] for row in _fetch_all(waste_types_sql, base_params) if row.get("value")]
     date_range = _fetch_one(range_sql, base_params)
     weeks = get_weekly_waste(FilterParams(devices=((FIXED_DEVICE_SERIAL,) if FIXED_DEVICE_SERIAL else ())))
 
@@ -515,6 +516,7 @@ def get_filter_options() -> dict:
         "devices": devices,
         "meal_types": meals,
         "categories": categories,
+        "waste_types": waste_types,
         "weeks": [
             {
                 "label": week["week"],

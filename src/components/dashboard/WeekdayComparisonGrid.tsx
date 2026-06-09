@@ -7,9 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { dashboardApi, type DashboardFilters, type FilterOptions } from "@/lib/dashboard";
 
-
-const WASTE_TYPE_OPTIONS = ["Plate Waste", "Production Waste", "Preparation Waste", "Spoilage", "Other"];
-
 interface WeekdayComparisonGridProps {
   filters: DashboardFilters;
   options?: FilterOptions;
@@ -36,6 +33,7 @@ export default function WeekdayComparisonGrid({ filters, options }: WeekdayCompa
   const weeks = data?.weeks ?? [];
   const rows = data?.rows ?? [];
   const availableWeeks = options?.weeks ?? [];
+  const wasteTypeOptions = options?.waste_types ?? [];
   const allWeeksSelected = availableWeeks.length > 0 && selectedWeeks.length === availableWeeks.length;
   const filteredWeeks = useMemo(() => {
     const query = weekSearch.trim().toLowerCase();
@@ -84,7 +82,7 @@ export default function WeekdayComparisonGrid({ filters, options }: WeekdayCompa
             >
               All Waste
             </button>
-            {WASTE_TYPE_OPTIONS.map((option) => (
+            {wasteTypeOptions.map((option) => (
               <button
                 key={option}
                 onClick={() => toggleWasteType(option)}

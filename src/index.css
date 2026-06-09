@@ -4,6 +4,16 @@
 @tailwind components;
 @tailwind utilities;
 
+@media print {
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  main {
+    overflow: visible !important;
+  }
+}
+
 @layer base {
   :root {
     --background: 220 14% 97%;

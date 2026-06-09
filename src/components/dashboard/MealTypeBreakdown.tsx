@@ -2,9 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 import { dashboardApi, type DashboardFilters } from "@/lib/dashboard";
-
-
-const WASTE_TYPE_OPTIONS = ["Plate Waste", "Production Waste", "Preparation Waste", "Spoilage", "Other"];
+import { useDashboardFilterOptions } from "@/hooks/use-dashboard-data";
 
 
 interface MealTypeBreakdownProps {
@@ -13,10 +11,15 @@ interface MealTypeBreakdownProps {
 
 
 export default function MealTypeBreakdown({ filters }: MealTypeBreakdownProps) {
-  const [selectedWasteType, setSelectedWasteType] = useState("Plate Waste");
+  const { data: filterOptions } = useDashboardFilterOptions();
+  const wasteTypeOptions = filterOptions?.waste_types ?? [];
+  const [selectedWasteType, setSelectedWasteType] = useState("");
+  const activeWasteType = selectedWasteType || wasteTypeOptions[0] || "";
+
   const { data = [] } = useQuery({
-    queryKey: ["meal-type-breakdown", filters, selectedWasteType],
-    queryFn: () => dashboardApi.getMealBreakdown(filters, [selectedWasteType]),
+    queryKey: ["meal-type-breakdown", filters, activeWasteType],
+    queryFn: () => dashboardApi.getMealBreakdown(filters, activeWasteType ? [activeWasteType] : []),
+    enabled: !!activeWasteType,
   });
 
   const total = data.reduce((sum, item) => sum + item.value, 0) || 1;
@@ -35,11 +38,11 @@ export default function MealTypeBreakdown({ filters }: MealTypeBreakdownProps) {
           <p className="text-xs text-muted-foreground mt-1">Select a waste type to see when it happens most.</p>
         </div>
         <select
-          value={selectedWasteType}
+          value={activeWasteType}
           onChange={(event) => setSelectedWasteType(event.target.value)}
           className="text-sm border border-border rounded px-2 py-1 bg-card text-foreground"
         >
-          {WASTE_TYPE_OPTIONS.map((option) => (
+          {wasteTypeOptions.map((option) => (
             <option key={option} value={option}>
               {option}
             </option>
