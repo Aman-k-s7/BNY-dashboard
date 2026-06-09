@@ -493,8 +493,7 @@ def get_filter_options() -> dict:
     waste_types_sql = f"""
         SELECT DISTINCT {_json_value_expr("$.scan_data.food_waste_type")} AS value
         FROM {_table()}
-        {base_where}
-          AND JSON_VALID(request) = 1
+        WHERE company_id = %s
           AND {_json_value_expr("$.scan_data.food_waste_type")} IS NOT NULL
           AND {_json_value_expr("$.scan_data.food_waste_type")} <> ''
         ORDER BY value ASC
@@ -508,7 +507,7 @@ def get_filter_options() -> dict:
     devices = [row["value"] for row in _fetch_all(devices_sql, base_params)]
     meals = [row["value"] for row in _fetch_all(meals_sql, base_params)]
     categories = [row["value"] for row in _fetch_all(categories_sql, base_params)]
-    waste_types = [row["value"] for row in _fetch_all(waste_types_sql, base_params) if row.get("value")]
+    waste_types = [row["value"] for row in _fetch_all(waste_types_sql, [COMPANY_ID]) if row.get("value")]
     date_range = _fetch_one(range_sql, base_params)
     weeks = get_weekly_waste(FilterParams(devices=((FIXED_DEVICE_SERIAL,) if FIXED_DEVICE_SERIAL else ())))
 
