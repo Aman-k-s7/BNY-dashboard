@@ -457,7 +457,14 @@ def get_top_devices(filters: FilterParams, limit: int = 5) -> list[dict]:
         ORDER BY value DESC, name ASC
         LIMIT %s
     """
-    return _fetch_all(sql, [*params, safe_limit])
+    rows = _fetch_all(sql, [*params, safe_limit])
+    site_names = {
+        "AGFW26005": "BNY (Pune)",
+    }
+    return [
+        {"name": site_names.get(row["name"], row["name"]), "value": float(row["value"] or 0)}
+        for row in rows
+    ]
 
 
 def get_filter_options() -> dict:
