@@ -794,7 +794,7 @@ def get_usage_analytics(filters: FilterParams) -> dict:
     return {
         "total_scans": total_scans,
         "active_days": active_days,
-        "scans_per_day": round(total_scans / active_days, 1) if active_days else 0,
+        "scans_per_day": round(total_scans / active_days) if active_days else 0,
         "total_devices": int(totals.get("total_devices") or 0),
         "by_meal": by_meal,
         "by_waste_type": by_waste_type,
